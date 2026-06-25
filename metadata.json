@@ -1,0 +1,6 @@
+{
+  "name": "FESMODA - Plateforme de Vote Mode & Art",
+  "description": "Plateforme professionnelle de vote en ligne pour les événements de mode et d'art FESMODA, avec gestion de candidats, dashboard admin et intégration Money Fusion.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

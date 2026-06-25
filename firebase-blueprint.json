@@ -1,0 +1,98 @@
+{
+  "entities": {
+    "candidate": {
+      "title": "Candidate",
+      "description": "A candidate in the fashion/art event",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "bio": { "type": "string" },
+        "photoUrl": { "type": "string", "format": "uri" },
+        "category": { "type": "string", "enum": ["Fashion", "Art", "Design"] },
+        "voteCount": { "type": "integer" },
+        "isEligible": { "type": "boolean" },
+        "status": { "type": "string", "enum": ["active", "pending", "elite", "disqualified"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "category"]
+    },
+    "vote": {
+      "title": "Vote",
+      "description": "A vote cast for a candidate",
+      "type": "object",
+      "properties": {
+        "candidateId": { "type": "string" },
+        "voterEmail": { "type": "string", "format": "email" },
+        "amount": { "type": "number" },
+        "paymentStatus": { "type": "string", "enum": ["pending", "completed", "failed"] },
+        "transactionId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["candidateId", "amount", "paymentStatus"]
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Application settings including payment configuration",
+      "type": "object",
+      "properties": {
+        "moneyFusionApiKey": { "type": "string" },
+        "moneyFusionMerchantId": { "type": "string" },
+        "votePrice": { "type": "number" },
+        "isVotingEnabled": { "type": "boolean" }
+      }
+    },
+    "user": {
+      "title": "User",
+      "description": "App user (admin or candidate)",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string", "format": "uri" },
+        "bio": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "candidate"] },
+        "candidateId": { "type": "string", "description": "Linked candidate ID if role is candidate" }
+      }
+    },
+    "blog": {
+      "title": "Blog",
+      "description": "A blog post published by the admin",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "image": { "type": "string", "format": "uri" },
+        "date": { "type": "string" },
+        "author": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "content"]
+    }
+  },
+  "firestore": {
+    "/candidates/{candidateId}": {
+      "schema": "candidate",
+      "description": "Collection of candidates"
+    },
+    "/votes/{voteId}": {
+      "schema": "vote",
+      "description": "Collection of votes"
+    },
+    "/settings/global": {
+      "schema": "settings",
+      "description": "Global application settings"
+    },
+    "/users/{userId}": {
+      "schema": "user",
+      "description": "User profiles and roles"
+    },
+    "/blogs/{blogId}": {
+      "schema": "blog",
+      "description": "Collection of blog posts"
+    }
+  }
+}
