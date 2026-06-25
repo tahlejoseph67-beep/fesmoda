@@ -26,7 +26,9 @@ import {
   Edit as EditIcon,
   Plus,
   Trash2,
-  LogIn
+  LogIn,
+  MapPin,
+  MessageSquare
 } from 'lucide-react';
 import { auth, db } from './firebase';
 import { seedDatabase } from './seedData';
@@ -69,7 +71,7 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
   console.error('Firestore Error: ', JSON.stringify(errInfo));
   throw new Error(JSON.stringify(errInfo));
 }
-import { UserProfile, Candidate, Settings, Vote, AppNotification, Blog } from './types';
+import { UserProfile, Candidate, Settings, Vote, AppNotification, Blog, Prize, Partner, ContactMessage, PartnerRequest } from './types';
 import { cn } from './lib/utils';
 
 const VOTE_GOAL = 2000;
@@ -435,7 +437,7 @@ const HeroSlider = () => {
   );
 };
 
-const Home = ({ blogs }: { blogs: Blog[] }) => {
+const Home = ({ blogs, prizes, partners }: { blogs: Blog[], prizes: Prize[], partners: Partner[] }) => {
   const displayBlogs = blogs.length > 0 ? blogs : defaultBlogs;
   return (
     <div className="relative">
@@ -483,39 +485,118 @@ const Home = ({ blogs }: { blogs: Blog[] }) => {
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-black text-gray-900 mb-4 tracking-tight">Nos Récompenses</h2>
-          <p className="text-pink-600 font-bold uppercase tracking-widest text-sm">Prix à gagner pour cet édition</p>
+          <p className="text-pink-600 font-bold uppercase tracking-widest text-sm">Prix à gagner pour cette édition</p>
         </div>
         
-        <motion.div 
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="relative rounded-[3rem] overflow-hidden shadow-2xl border border-pink-100 max-w-5xl mx-auto group"
-        >
-          <img 
-            src="https://images.unsplash.com/photo-1561406636-b8029a7a81cf?auto=format&fit=crop&w=1600&q=80" 
-            alt="Prix FESMODA 2026" 
-            className="w-full h-auto group-hover:scale-105 transition-transform duration-700"
-            referrerPolicy="no-referrer"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end justify-center p-8 md:p-16">
-            <div className="text-center max-w-2xl">
+        {prizes.length > 0 ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {prizes.map((prize, i) => (
               <motion.div
+                key={prize.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="bg-white rounded-3xl overflow-hidden shadow-lg border border-pink-50 hover:shadow-2xl transition-all group flex flex-col h-full"
               >
-                <h3 className="text-white text-3xl md:text-5xl font-black mb-6 drop-shadow-2xl">
-                  iPhone, Enveloppes Financières, Formations & Plus
-                </h3>
-                <p className="text-pink-100 text-lg font-medium drop-shadow-lg">
-                  Récompenser l'excellence et propulser les nouveaux talents de la mode béninoise.
-                </p>
+                <div className="aspect-[4/3] overflow-hidden bg-gray-50 relative shrink-0">
+                  <img
+                    src={prize.image || "https://images.unsplash.com/photo-1561406636-b8029a7a81cf?auto=format&fit=crop&w=1600&q=80"}
+                    alt={prize.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute top-4 left-4 bg-pink-600 text-white text-xs font-black px-3 py-1.5 rounded-full shadow">
+                    N° {i + 1}
+                  </div>
+                </div>
+                <div className="p-6 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">{prize.title}</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">{prize.description}</p>
+                  </div>
+                </div>
               </motion.div>
-            </div>
+            ))}
           </div>
-        </motion.div>
+        ) : (
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="relative rounded-[3rem] overflow-hidden shadow-2xl border border-pink-100 max-w-5xl mx-auto group"
+          >
+            <img 
+              src="https://images.unsplash.com/photo-1561406636-b8029a7a81cf?auto=format&fit=crop&w=1600&q=80" 
+              alt="Prix FESMODA 2026" 
+              className="w-full h-auto group-hover:scale-105 transition-transform duration-700"
+              referrerPolicy="no-referrer"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end justify-center p-8 md:p-16">
+              <div className="text-center max-w-2xl">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <h3 className="text-white text-3xl md:text-5xl font-black mb-6 drop-shadow-2xl">
+                    iPhone, Enveloppes Financières, Formations & Plus
+                  </h3>
+                  <p className="text-pink-100 text-lg font-medium drop-shadow-lg">
+                    Récompenser l'excellence et propulser les nouveaux talents de la mode béninoise.
+                  </p>
+                </motion.div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </div>
+    </div>
+
+    {/* Partners Section */}
+    <div className="py-24 bg-gray-50 border-y border-pink-50">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-black text-gray-900 mb-4 tracking-tight">Nos Partenaires</h2>
+          <p className="text-pink-600 font-bold uppercase tracking-widest text-sm">Ils soutiennent l'excellence créative</p>
+        </div>
+
+        {partners.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 items-center justify-center">
+            {partners.map((partner, i) => (
+              <motion.a
+                href={partner.websiteUrl || "#"}
+                target={partner.websiteUrl ? "_blank" : undefined}
+                rel="noopener noreferrer"
+                key={partner.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: (i % 6) * 0.05 }}
+                className="bg-white p-6 rounded-3xl border border-pink-50 shadow-sm hover:shadow-md hover:border-pink-200 transition-all flex flex-col items-center justify-center h-32 group relative overflow-hidden"
+              >
+                {partner.logo ? (
+                  <img
+                    src={partner.logo}
+                    alt={partner.name}
+                    className="max-h-16 max-w-full object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <span className="font-bold text-gray-400 group-hover:text-pink-600 transition-colors text-center text-sm">{partner.name}</span>
+                )}
+                <span className="absolute bottom-1.5 text-[8px] uppercase tracking-wider font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">
+                  {partner.category}
+                </span>
+              </motion.a>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-400 italic">
+            Partenaires officiels en cours de déploiement pour l'édition 2026.
+          </div>
+        )}
       </div>
     </div>
 
@@ -559,6 +640,488 @@ const Home = ({ blogs }: { blogs: Blog[] }) => {
     </div>
   </div>
 );
+};
+
+const ContactPage = () => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [subject, setSubject] = useState('');
+  const [message, setMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      const contactId = doc(collection(db, 'contacts')).id;
+      await setDoc(doc(db, 'contacts', contactId), {
+        id: contactId,
+        name,
+        email,
+        subject,
+        message,
+        createdAt: new Date().toISOString(),
+        read: false
+      });
+      setSuccess(true);
+      setName('');
+      setEmail('');
+      setSubject('');
+      setMessage('');
+    } catch (err: any) {
+      console.error("Error submitting contact form:", err);
+      setError("Une erreur s'est produite lors de l'envoi de votre message. Veuillez réessayer.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="pt-32 pb-24 px-4 max-w-7xl mx-auto">
+      <div className="text-center max-w-3xl mx-auto mb-16">
+        <h1 className="text-4xl md:text-5xl font-black text-gray-900 uppercase tracking-tight mb-4 animate-fade-in">Nous Contacter</h1>
+        <p className="text-lg text-gray-600 leading-relaxed">
+          Une question ? Un projet de partenariat ? N'hésitez pas à nous écrire. L'équipe FESMODA vous répondra dans les plus brefs délais.
+        </p>
+      </div>
+
+      <div className="grid lg:grid-cols-5 gap-12 max-w-6xl mx-auto">
+        {/* Contact Info Sidebar */}
+        <div className="lg:col-span-2 bg-gradient-to-br from-pink-600 to-rose-500 rounded-[3rem] p-8 md:p-12 text-white shadow-xl flex flex-col justify-between relative overflow-hidden h-full min-h-[400px]">
+          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+          
+          <div className="relative space-y-8">
+            <div>
+              <h3 className="text-2xl font-black uppercase tracking-tight mb-2">FESMODA 2026</h3>
+              <p className="text-pink-100 text-sm">Le carrefour de l'excellence et de la mode africaine à Cotonou.</p>
+            </div>
+
+            <div className="space-y-6">
+              <div className="flex items-start space-x-4">
+                <div className="p-3 bg-white/10 rounded-2xl shrink-0">
+                  <Mail className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-pink-200 font-bold uppercase tracking-wider">Email</p>
+                  <a href="mailto:contact@fesmoda.com" className="font-bold hover:underline">contact@fesmoda.com</a>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4">
+                <div className="p-3 bg-white/10 rounded-2xl shrink-0">
+                  <Phone className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-pink-200 font-bold uppercase tracking-wider">Téléphone / WhatsApp</p>
+                  <a href="tel:+22901000000" className="font-bold hover:underline">+229 01 00 00 00</a>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4">
+                <div className="p-3 bg-white/10 rounded-2xl shrink-0">
+                  <MapPin className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-pink-200 font-bold uppercase tracking-wider">Adresse</p>
+                  <p className="font-bold">Cotonou, Bénin</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative pt-8 border-t border-white/20 mt-8">
+            <p className="text-xs text-pink-100 font-medium">
+              Suivez-nous sur nos réseaux sociaux pour ne rien rater des coulisses de l'édition 2026 !
+            </p>
+          </div>
+        </div>
+
+        {/* Contact Form Container */}
+        <div className="lg:col-span-3 bg-white rounded-[3rem] border border-pink-50 shadow-xl p-8 md:p-12">
+          {success ? (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center py-12 space-y-6"
+            >
+              <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto shadow-sm">
+                <CheckCircle2 className="w-12 h-12" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black text-gray-900 uppercase tracking-tight">Message Envoyé !</h3>
+                <p className="text-gray-600 max-w-md mx-auto">
+                  Merci d'avoir contacté FESMODA. Votre message a été transmis avec succès à notre équipe d'administration.
+                </p>
+              </div>
+              <button 
+                onClick={() => setSuccess(false)}
+                className="px-6 py-3 bg-pink-600 hover:bg-pink-700 text-white font-bold rounded-2xl transition-colors shadow-sm"
+              >
+                Envoyer un autre message
+              </button>
+            </motion.div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tight mb-2 flex items-center gap-2">
+                <MessageSquare className="w-6 h-6 text-pink-600" />
+                <span>Formulaire de Contact</span>
+              </h2>
+              
+              {error && (
+                <div className="p-4 bg-red-50 border border-red-100 text-red-600 text-sm font-medium rounded-2xl">
+                  {error}
+                </div>
+              )}
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1.5">Nom Complet</label>
+                  <input 
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none bg-gray-50/50"
+                    placeholder="Ex: Jean Dupont"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1.5">Adresse Email</label>
+                  <input 
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none bg-gray-50/50"
+                    placeholder="Ex: jean.dupont@example.com"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1.5">Sujet du Message</label>
+                <input 
+                  type="text"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none bg-gray-50/50"
+                  placeholder="Ex: Proposition artistique / Demande d'informations"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1.5">Votre Message</label>
+                <textarea 
+                  rows={5}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none bg-gray-50/50 resize-none"
+                  placeholder="Écrivez votre message ici..."
+                />
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="w-full py-4 bg-pink-600 hover:bg-pink-700 text-white rounded-2xl font-bold transition-all shadow hover:shadow-lg flex items-center justify-center space-x-2 disabled:opacity-50"
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center space-x-2">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    <span>Envoi en cours...</span>
+                  </span>
+                ) : (
+                  <span>Envoyer mon Message</span>
+                )}
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const PartnersPage = ({ partners }: { partners: Partner[] }) => {
+  const [activeCategory, setActiveCategory] = useState<'all' | 'platinum' | 'gold' | 'silver' | 'media'>('all');
+  const [showForm, setShowForm] = useState(false);
+
+  // Partner Request Form States
+  const [companyName, setCompanyName] = useState('');
+  const [contactName, setContactName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [category, setCategory] = useState<'platinum' | 'gold' | 'silver' | 'media' | 'other'>('platinum');
+  const [message, setMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const filteredPartners = activeCategory === 'all' 
+    ? partners 
+    : partners.filter(p => p.category === activeCategory);
+
+  const categories = [
+    { id: 'all', name: 'Tous' },
+    { id: 'platinum', name: 'Platine' },
+    { id: 'gold', name: 'Or' },
+    { id: 'silver', name: 'Argent' },
+    { id: 'media', name: 'Média' },
+  ];
+
+  const handlePartnerRequestSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      const requestId = doc(collection(db, 'partnerRequests')).id;
+      await setDoc(doc(db, 'partnerRequests', requestId), {
+        id: requestId,
+        companyName,
+        contactName,
+        email,
+        phone,
+        category,
+        message,
+        createdAt: new Date().toISOString(),
+        status: 'pending'
+      });
+      setSuccess(true);
+      setCompanyName('');
+      setContactName('');
+      setEmail('');
+      setPhone('');
+      setCategory('platinum');
+      setMessage('');
+    } catch (err: any) {
+      console.error("Error submitting partner request:", err);
+      setError("Une erreur s'est produite lors de l'envoi de votre demande de partenariat.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="pt-32 pb-24 px-4 max-w-7xl mx-auto animate-fade-in">
+      <div className="text-center max-w-3xl mx-auto mb-16">
+        <h1 className="text-4xl md:text-5xl font-black text-gray-900 uppercase tracking-tight mb-4">Nos Partenaires</h1>
+        <p className="text-lg text-gray-600 leading-relaxed">
+          Ils s'engagent à nos côtés pour valoriser l'excellence créative, la culture et propulser les nouveaux talents de la mode africaine.
+        </p>
+      </div>
+
+      {/* Category selector */}
+      <div className="flex justify-center space-x-2 mb-12 overflow-x-auto pb-2">
+        {categories.map((cat) => (
+          <button
+            key={cat.id}
+            onClick={() => setActiveCategory(cat.id as any)}
+            className={`px-5 py-2 rounded-full font-bold text-xs uppercase tracking-wider transition-all border ${
+              activeCategory === cat.id 
+                ? "bg-pink-600 text-white border-pink-600 shadow-sm" 
+                : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
+            }`}
+          >
+            {cat.name}
+          </button>
+        ))}
+      </div>
+
+      {/* Partners list */}
+      {filteredPartners.length > 0 ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-16">
+          {filteredPartners.map((partner) => (
+            <motion.a
+              key={partner.id}
+              href={partner.websiteUrl || "#"}
+              target={partner.websiteUrl ? "_blank" : undefined}
+              rel="noopener noreferrer"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white p-8 rounded-[2rem] border border-pink-50 shadow-sm hover:shadow-xl hover:border-pink-200 transition-all flex flex-col items-center justify-center h-44 group relative"
+            >
+              <div className="absolute top-4 right-4 text-[9px] font-black uppercase tracking-wider text-pink-600 bg-pink-50 px-2.5 py-1 rounded-full">
+                {partner.category}
+              </div>
+              {partner.logo ? (
+                <img
+                  src={partner.logo}
+                  alt={partner.name}
+                  className="max-h-20 max-w-full object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <h3 className="font-bold text-gray-800 text-center group-hover:text-pink-600 transition-colors">{partner.name}</h3>
+              )}
+            </motion.a>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-16 bg-pink-50/20 rounded-[2rem] border border-dashed border-pink-200 max-w-4xl mx-auto mb-16">
+          <p className="text-gray-500 font-medium">Aucun partenaire enregistré dans cette catégorie pour le moment.</p>
+        </div>
+      )}
+
+      {/* Call to action & Request Form */}
+      <div className="max-w-4xl mx-auto space-y-12">
+        <div className="bg-gradient-to-br from-pink-600 to-rose-500 rounded-[3rem] p-8 md:p-16 text-white text-center shadow-xl relative overflow-hidden">
+          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+          <h2 className="text-2xl md:text-3xl font-black mb-4 uppercase tracking-tight">Devenir Partenaire</h2>
+          <p className="text-pink-100 max-w-2xl mx-auto mb-8 leading-relaxed">
+            Associez l'image de votre marque à l'excellence créative et touchez une large communauté de passionnés de mode et de culture.
+          </p>
+          <button 
+            onClick={() => setShowForm(!showForm)}
+            className="inline-block bg-white text-pink-600 font-bold px-8 py-4 rounded-2xl hover:bg-pink-50 transition-all shadow-md transform hover:-translate-y-0.5 active:translate-y-0"
+          >
+            {showForm ? "Masquer le formulaire" : "Soumettre une demande de partenariat"}
+          </button>
+        </div>
+
+        {/* Dynamic submission form */}
+        <AnimatePresence>
+          {showForm && (
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 30 }}
+              className="bg-white rounded-[3rem] border border-pink-50 shadow-xl p-8 md:p-12"
+            >
+              {success ? (
+                <div className="text-center py-8 space-y-6">
+                  <div className="w-16 h-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto shadow-sm">
+                    <CheckCircle2 className="w-10 h-10" />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">Demande Enregistrée !</h3>
+                    <p className="text-gray-600 max-w-md mx-auto text-sm leading-relaxed">
+                      Votre demande de partenariat a été enregistrée avec succès. Notre équipe analysera votre proposition et vous recontactera sous peu.
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => setSuccess(false)}
+                    className="px-5 py-2.5 bg-pink-600 hover:bg-pink-700 text-white font-bold rounded-xl text-sm transition-colors shadow-sm"
+                  >
+                    Soumettre une autre proposition
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handlePartnerRequestSubmit} className="space-y-6">
+                  <div className="flex items-center space-x-3 pb-4 border-b border-gray-100">
+                    <Handshake className="w-6 h-6 text-pink-600" />
+                    <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">Demande de Partenariat Officiel</h3>
+                  </div>
+
+                  {error && (
+                    <div className="p-4 bg-red-50 border border-red-100 text-red-600 text-sm font-medium rounded-2xl">
+                      {error}
+                    </div>
+                  )}
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-1.5">Nom de l'Entreprise / Organisation</label>
+                      <input 
+                        type="text"
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                        required
+                        className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none bg-gray-50/50"
+                        placeholder="Ex: Entreprise S.A."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-1.5">Nom du Contact Principal</label>
+                      <input 
+                        type="text"
+                        value={contactName}
+                        onChange={(e) => setContactName(e.target.value)}
+                        required
+                        className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none bg-gray-50/50"
+                        placeholder="Ex: Marie KOBE"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-1.5">Adresse Email de Contact</label>
+                      <input 
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none bg-gray-50/50"
+                        placeholder="Ex: contact@entreprise.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-1.5">Téléphone (avec indicatif)</label>
+                      <input 
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        required
+                        className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none bg-gray-50/50"
+                        placeholder="Ex: +229 97 00 00 00"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1.5">Catégorie de Partenariat Souhaitée</label>
+                    <select 
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value as any)}
+                      className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none bg-gray-50/50"
+                    >
+                      <option value="platinum">Platinum / Platine (Sponsor Majeur)</option>
+                      <option value="gold">Gold / Or (Sponsor Officiel)</option>
+                      <option value="silver">Silver / Argent (Sponsor Classique)</option>
+                      <option value="media">Partenaire Média (Presse / Radio / TV / Web)</option>
+                      <option value="other">Autre collaboration / Services logistiques</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1.5">Présentez votre Proposition de Collaboration</label>
+                    <textarea 
+                      rows={4}
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      required
+                      className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none bg-gray-50/50 resize-none"
+                      placeholder="Comment souhaitez-vous soutenir l'événement ? (Besoins, apports matériels, financiers ou de visibilité...)"
+                    />
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    disabled={isSubmitting}
+                    className="w-full py-4 bg-pink-600 hover:bg-pink-700 text-white rounded-2xl font-bold transition-all shadow-md flex items-center justify-center space-x-2"
+                  >
+                    {isSubmitting ? (
+                      <span>Envoi de la demande...</span>
+                    ) : (
+                      <span>Envoyer ma Proposition de Partenariat</span>
+                    )}
+                  </button>
+                </form>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
 };
 
 const Candidates = ({ candidates }: { candidates: Candidate[] }) => {
@@ -920,6 +1483,10 @@ export default function App() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [prizes, setPrizes] = useState<Prize[]>([]);
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [contacts, setContacts] = useState<ContactMessage[]>([]);
+  const [partnerRequests, setPartnerRequests] = useState<PartnerRequest[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1011,11 +1578,29 @@ export default function App() {
       handleFirestoreError(error, OperationType.LIST, 'blogs');
     });
 
+    // Prizes Listener
+    const unsubscribePrizes = onSnapshot(query(collection(db, 'prizes'), orderBy('order', 'asc')), (snapshot) => {
+      const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Prize));
+      setPrizes(list);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'prizes');
+    });
+
+    // Partners Listener
+    const unsubscribePartners = onSnapshot(query(collection(db, 'partners'), orderBy('createdAt', 'desc')), (snapshot) => {
+      const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Partner));
+      setPartners(list);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'partners');
+    });
+
     return () => {
       unsubscribeAuth();
       unsubscribeCandidates();
       unsubscribeSettings();
       unsubscribeBlogs();
+      unsubscribePrizes();
+      unsubscribePartners();
     };
   }, []);
 
@@ -1041,6 +1626,42 @@ export default function App() {
     });
 
     return () => unsubscribe();
+  }, [user]);
+
+  // Admin-only listeners (contacts, partnerRequests)
+  useEffect(() => {
+    if (!user || user.role !== 'admin') {
+      setContacts([]);
+      setPartnerRequests([]);
+      return;
+    }
+
+    const unsubscribeContacts = onSnapshot(
+      query(collection(db, 'contacts'), orderBy('createdAt', 'desc')),
+      (snapshot) => {
+        const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ContactMessage));
+        setContacts(list);
+      },
+      (error) => {
+        console.error("Error listening to contacts:", error);
+      }
+    );
+
+    const unsubscribePartnerRequests = onSnapshot(
+      query(collection(db, 'partnerRequests'), orderBy('createdAt', 'desc')),
+      (snapshot) => {
+        const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PartnerRequest));
+        setPartnerRequests(list);
+      },
+      (error) => {
+        console.error("Error listening to partnerRequests:", error);
+      }
+    );
+
+    return () => {
+      unsubscribeContacts();
+      unsubscribePartnerRequests();
+    };
   }, [user]);
 
   const handleLogin = () => {
@@ -1164,17 +1785,17 @@ export default function App() {
           
           <main>
             <Routes>
-              <Route path="/" element={<Home blogs={blogs} />} />
+              <Route path="/" element={<Home blogs={blogs} prizes={prizes} partners={partners} />} />
               <Route path="/login" element={<LoginPage onEmailLogin={handleEmailLogin} onGoogleLogin={handleGoogleLogin} user={user} />} />
               <Route path="/candidates" element={<Candidates candidates={candidates} />} />
               <Route path="/candidate/:id" element={<CandidateProfile candidates={candidates} />} />
               <Route path="/stats" element={<StatsPage candidates={candidates} />} />
               <Route path="/about" element={<div className="pt-32 px-4 max-w-3xl mx-auto"><h1 className="text-4xl font-bold mb-8">Qui sommes-nous?</h1><p className="text-lg text-gray-600 leading-relaxed">FESMODA est un événement annuel dédié à la promotion de la mode et de l'art. Notre mission est de fournir une plateforme aux créateurs émergents pour briller et se connecter avec un public passionné.</p></div>} />
-              <Route path="/partners" element={<div className="pt-32 px-4 max-w-3xl mx-auto"><h1 className="text-4xl font-bold mb-8">Devenir Partenaire</h1><p className="text-lg text-gray-600 leading-relaxed">Rejoignez l'aventure FESMODA et associez votre marque à l'excellence créative. Contactez-nous pour découvrir nos opportunités de partenariat.</p></div>} />
-              <Route path="/contact" element={<div className="pt-32 px-4 max-w-3xl mx-auto"><h1 className="text-4xl font-bold mb-8">Nous Contacter</h1><p className="text-lg text-gray-600 leading-relaxed">Une question ? Un projet ? Écrivez-nous à contact@fesmoda.com ou utilisez le formulaire ci-dessous.</p></div>} />
+              <Route path="/partners" element={<PartnersPage partners={partners} />} />
+              <Route path="/contact" element={<ContactPage />} />
               
               {/* Admin & Dashboard routes would go here */}
-              <Route path="/admin" element={<AdminDashboard user={user} candidates={candidates} settings={settings} createNotification={createNotification} blogs={blogs} />} />
+              <Route path="/admin" element={<AdminDashboard user={user} candidates={candidates} settings={settings} createNotification={createNotification} blogs={blogs} prizes={prizes} partners={partners} contacts={contacts} partnerRequests={partnerRequests} />} />
               <Route path="/dashboard" element={<CandidateDashboard user={user} candidates={candidates} />} />
               <Route path="/profile" element={<ProfileSettings user={user} />} />
               <Route path="/vote/:id" element={<VotePage candidates={candidates} settings={settings} onVoteSuccess={handleVoteSuccess} />} />
@@ -1234,14 +1855,18 @@ export default function App() {
 
 // --- Additional Components for Dashboards ---
 
-const AdminDashboard = ({ user, candidates, settings, createNotification, blogs }: { 
+const AdminDashboard = ({ user, candidates, settings, createNotification, blogs, prizes, partners, contacts = [], partnerRequests = [] }: { 
   user: UserProfile | null, 
   candidates: Candidate[], 
   settings: Settings | null, 
   createNotification: (userId: string, title: string, message: string, type: 'vote' | 'status' | 'system') => Promise<void>,
-  blogs: Blog[]
+  blogs: Blog[],
+  prizes: Prize[],
+  partners: Partner[],
+  contacts?: ContactMessage[],
+  partnerRequests?: PartnerRequest[]
 }) => {
-  const [activeTab, setActiveTab] = useState<'general' | 'candidates' | 'blogs'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'candidates' | 'blogs' | 'prizes' | 'partners' | 'messages' | 'requests'>('general');
   const [merchantId, setMerchantId] = useState(settings?.moneyFusionMerchantId || '');
   const [apiKey, setApiKey] = useState(settings?.moneyFusionApiKey || '');
   const [votePrice, setVotePrice] = useState(settings?.votePrice || 100);
@@ -1270,6 +1895,39 @@ const AdminDashboard = ({ user, candidates, settings, createNotification, blogs 
   const [blogContent, setBlogContent] = useState('');
   const [blogImage, setBlogImage] = useState('');
   const [blogAuthor, setBlogAuthor] = useState('');
+
+  // Blog editing state
+  const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
+  const [editBlogTitle, setEditBlogTitle] = useState('');
+  const [editBlogContent, setEditBlogContent] = useState('');
+  const [editBlogImage, setEditBlogImage] = useState('');
+  const [editBlogAuthor, setEditBlogAuthor] = useState('');
+
+  // Prize form state
+  const [prizeTitle, setPrizeTitle] = useState('');
+  const [prizeDescription, setPrizeDescription] = useState('');
+  const [prizeImage, setPrizeImage] = useState('');
+  const [prizeOrder, setPrizeOrder] = useState<number>(0);
+
+  // Prize edit state
+  const [editingPrize, setEditingPrize] = useState<Prize | null>(null);
+  const [editPrizeTitle, setEditPrizeTitle] = useState('');
+  const [editPrizeDescription, setEditPrizeDescription] = useState('');
+  const [editPrizeImage, setEditPrizeImage] = useState('');
+  const [editPrizeOrder, setEditPrizeOrder] = useState<number>(0);
+
+  // Partner form state
+  const [partnerName, setPartnerName] = useState('');
+  const [partnerLogo, setPartnerLogo] = useState('');
+  const [partnerCategory, setPartnerCategory] = useState<'platinum' | 'gold' | 'silver' | 'media' | 'other'>('platinum');
+  const [partnerWebsite, setPartnerWebsite] = useState('');
+
+  // Partner edit state
+  const [editingPartner, setEditingPartner] = useState<Partner | null>(null);
+  const [editPartnerName, setEditPartnerName] = useState('');
+  const [editPartnerLogo, setEditPartnerLogo] = useState('');
+  const [editPartnerCategory, setEditPartnerCategory] = useState<'platinum' | 'gold' | 'silver' | 'media' | 'other'>('platinum');
+  const [editPartnerWebsite, setEditPartnerWebsite] = useState('');
 
   const handleCandidatePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1312,6 +1970,71 @@ const AdminDashboard = ({ user, candidates, settings, createNotification, blogs 
       reader.onloadend = () => {
         setBlogImage(reader.result as string);
       };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handlePrizeImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 1000000) {
+        alert("L'image est trop grande (max 1MB).");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => setPrizeImage(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleEditPrizeImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 1000000) {
+        alert("L'image est trop grande (max 1MB).");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => setEditPrizeImage(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handlePartnerLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 1000000) {
+        alert("L'image est trop grande (max 1MB).");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => setPartnerLogo(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleEditPartnerLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 1000000) {
+        alert("L'image est trop grande (max 1MB).");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => setEditPartnerLogo(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleEditBlogImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 1000000) {
+        alert("L'image est trop grande (max 1MB).");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => setEditBlogImage(reader.result as string);
       reader.readAsDataURL(file);
     }
   };
@@ -1500,6 +2223,209 @@ const AdminDashboard = ({ user, candidates, settings, createNotification, blogs 
     }
   };
 
+  // Blog Editing handlers
+  const handleEditBlogClick = (b: Blog) => {
+    setEditingBlog(b);
+    setEditBlogTitle(b.title);
+    setEditBlogContent(b.content);
+    setEditBlogImage(b.image);
+    setEditBlogAuthor(b.author || 'FESMODA Officiel');
+  };
+
+  const handleSaveEditedBlog = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingBlog) return;
+    try {
+      await updateDoc(doc(db, 'blogs', editingBlog.id), {
+        title: editBlogTitle,
+        content: editBlogContent,
+        image: editBlogImage,
+        author: editBlogAuthor
+      });
+      setEditingBlog(null);
+      alert('Publication mise à jour avec succès !');
+    } catch (error) {
+      console.error("Error updating blog post:", error);
+      alert("Erreur de modification.");
+    }
+  };
+
+  // Prizes CRUD handlers
+  const handleAddPrize = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const prizeId = Math.random().toString(36).substr(2, 9);
+      const newPrize: Prize = {
+        id: prizeId,
+        title: prizeTitle,
+        description: prizeDescription,
+        image: prizeImage || "https://images.unsplash.com/photo-1561406636-b8029a7a81cf?auto=format&fit=crop&w=800&q=80",
+        order: Number(prizeOrder) || prizes.length + 1,
+        createdAt: new Date().toISOString()
+      };
+      await setDoc(doc(db, 'prizes', prizeId), newPrize);
+      setPrizeTitle('');
+      setPrizeDescription('');
+      setPrizeImage('');
+      setPrizeOrder(prizes.length + 2);
+      alert('Prix ajouté avec succès !');
+    } catch (error) {
+      console.error("Error adding prize:", error);
+      alert("Erreur lors de l'ajout du prix.");
+    }
+  };
+
+  const handleEditPrizeClick = (p: Prize) => {
+    setEditingPrize(p);
+    setEditPrizeTitle(p.title);
+    setEditPrizeDescription(p.description);
+    setEditPrizeImage(p.image);
+    setEditPrizeOrder(p.order || 0);
+  };
+
+  const handleSaveEditedPrize = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPrize) return;
+    try {
+      await updateDoc(doc(db, 'prizes', editingPrize.id), {
+        title: editPrizeTitle,
+        description: editPrizeDescription,
+        image: editPrizeImage,
+        order: Number(editPrizeOrder)
+      });
+      setEditingPrize(null);
+      alert('Prix mis à jour avec succès !');
+    } catch (error) {
+      console.error("Error saving prize:", error);
+      alert("Erreur lors de la modification.");
+    }
+  };
+
+  const handleDeletePrize = async (prizeId: string) => {
+    if (!confirm("Voulez-vous supprimer ce prix ?")) return;
+    try {
+      await deleteDoc(doc(db, 'prizes', prizeId));
+      alert('Prix supprimé !');
+    } catch (error) {
+      console.error("Error deleting prize:", error);
+    }
+  };
+
+  // Partners CRUD handlers
+  const handleAddPartner = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const partnerId = Math.random().toString(36).substr(2, 9);
+      const newPartner: Partner = {
+        id: partnerId,
+        name: partnerName,
+        logo: partnerLogo || "https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=800&q=80",
+        category: partnerCategory,
+        websiteUrl: partnerWebsite || "",
+        createdAt: new Date().toISOString()
+      };
+      await setDoc(doc(db, 'partners', partnerId), newPartner);
+      setPartnerName('');
+      setPartnerLogo('');
+      setPartnerCategory('platinum');
+      setPartnerWebsite('');
+      alert('Partenaire ajouté avec succès !');
+    } catch (error) {
+      console.error("Error adding partner:", error);
+      alert("Erreur lors de l'ajout.");
+    }
+  };
+
+  const handleEditPartnerClick = (p: Partner) => {
+    setEditingPartner(p);
+    setEditPartnerName(p.name);
+    setEditPartnerLogo(p.logo || '');
+    setEditPartnerCategory(p.category || 'platinum');
+    setEditPartnerWebsite(p.websiteUrl || '');
+  };
+
+  const handleSaveEditedPartner = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPartner) return;
+    try {
+      await updateDoc(doc(db, 'partners', editingPartner.id), {
+        name: editPartnerName,
+        logo: editPartnerLogo,
+        category: editPartnerCategory,
+        websiteUrl: editPartnerWebsite
+      });
+      setEditingPartner(null);
+      alert('Partenaire mis à jour avec succès !');
+    } catch (error) {
+      console.error("Error updating partner:", error);
+      alert("Erreur de modification.");
+    }
+  };
+
+  const handleDeletePartner = async (partnerId: string) => {
+    if (!confirm("Voulez-vous supprimer ce partenaire ?")) return;
+    try {
+      await deleteDoc(doc(db, 'partners', partnerId));
+      alert('Partenaire supprimé !');
+    } catch (error) {
+      console.error("Error deleting partner:", error);
+    }
+  };
+
+  const handleMarkMessageAsRead = async (messageId: string, read: boolean) => {
+    try {
+      await updateDoc(doc(db, 'contacts', messageId), { read });
+    } catch (error) {
+      console.error("Error updating message read status:", error);
+    }
+  };
+
+  const handleDeleteMessage = async (messageId: string) => {
+    if (!confirm("Voulez-vous vraiment supprimer ce message ?")) return;
+    try {
+      await deleteDoc(doc(db, 'contacts', messageId));
+    } catch (error) {
+      console.error("Error deleting message:", error);
+    }
+  };
+
+  const handleMarkRequestStatus = async (requestId: string, status: 'approved' | 'declined', requestData: PartnerRequest) => {
+    try {
+      await updateDoc(doc(db, 'partnerRequests', requestId), { status });
+      if (status === 'approved') {
+        const existingPartner = partners.find(p => p.name.toLowerCase() === requestData.companyName.toLowerCase());
+        if (!existingPartner) {
+          const newPartnerId = doc(collection(db, 'partners')).id;
+          await setDoc(doc(db, 'partners', newPartnerId), {
+            id: newPartnerId,
+            name: requestData.companyName,
+            category: requestData.category === 'other' ? 'silver' : requestData.category,
+            logo: '', 
+            websiteUrl: '',
+            createdAt: new Date().toISOString()
+          });
+          alert("La demande de partenariat a été approuvée ! L'entreprise a été automatiquement ajoutée à votre liste de partenaires officiels.");
+        } else {
+          alert("La demande de partenariat a été approuvée ! L'entreprise figure déjà dans la liste des partenaires.");
+        }
+      } else {
+        alert("La demande de partenariat a été refusée.");
+      }
+    } catch (error) {
+      console.error("Error updating partner request status:", error);
+      alert("Une erreur est survenue lors de la mise à jour de la demande.");
+    }
+  };
+
+  const handleDeletePartnerRequest = async (requestId: string) => {
+    if (!confirm("Voulez-vous vraiment supprimer cette demande de partenariat de l'historique ?")) return;
+    try {
+      await deleteDoc(doc(db, 'partnerRequests', requestId));
+    } catch (error) {
+      console.error("Error deleting partner request:", error);
+    }
+  };
+
   return (
     <div className="pt-32 pb-20 px-4 max-w-7xl mx-auto">
       {/* Header */}
@@ -1551,6 +2477,64 @@ const AdminDashboard = ({ user, candidates, settings, createNotification, blogs 
         >
           <BookOpen className="w-4 h-4" />
           <span>Publications & Actualités</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('prizes')}
+          className={cn(
+            "px-6 py-3 font-bold text-sm transition-all rounded-t-2xl flex items-center space-x-2 border-b-2",
+            activeTab === 'prizes' 
+              ? "bg-pink-50 text-pink-600 border-pink-600" 
+              : "text-gray-500 border-transparent hover:text-gray-900"
+          )}
+        >
+          <Award className="w-4 h-4" />
+          <span>Prix & Récompenses</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('partners')}
+          className={cn(
+            "px-6 py-3 font-bold text-sm transition-all rounded-t-2xl flex items-center space-x-2 border-b-2",
+            activeTab === 'partners' 
+              ? "bg-pink-50 text-pink-600 border-pink-600" 
+              : "text-gray-500 border-transparent hover:text-gray-900"
+          )}
+        >
+          <Handshake className="w-4 h-4" />
+          <span>Nos Partenaires</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('messages')}
+          className={cn(
+            "px-6 py-3 font-bold text-sm transition-all rounded-t-2xl flex items-center space-x-2 border-b-2",
+            activeTab === 'messages' 
+              ? "bg-pink-50 text-pink-600 border-pink-600" 
+              : "text-gray-500 border-transparent hover:text-gray-900"
+          )}
+        >
+          <MessageSquare className="w-4 h-4" />
+          <span>Messages Reçus</span>
+          {contacts.filter(c => !c.read).length > 0 && (
+            <span className="bg-pink-600 text-white text-[10px] px-2 py-0.5 rounded-full font-black">
+              {contacts.filter(c => !c.read).length}
+            </span>
+          )}
+        </button>
+        <button
+          onClick={() => setActiveTab('requests')}
+          className={cn(
+            "px-6 py-3 font-bold text-sm transition-all rounded-t-2xl flex items-center space-x-2 border-b-2",
+            activeTab === 'requests' 
+              ? "bg-pink-50 text-pink-600 border-pink-600" 
+              : "text-gray-500 border-transparent hover:text-gray-900"
+          )}
+        >
+          <Handshake className="w-4 h-4" />
+          <span>Demandes Partenaires</span>
+          {partnerRequests.filter(r => r.status === 'pending').length > 0 && (
+            <span className="bg-pink-600 text-white text-[10px] px-2 py-0.5 rounded-full font-black">
+              {partnerRequests.filter(r => r.status === 'pending').length}
+            </span>
+          )}
         </button>
       </div>
 
@@ -1985,86 +2969,173 @@ const AdminDashboard = ({ user, candidates, settings, createNotification, blogs 
 
       {activeTab === 'blogs' && (
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Create Blog Form */}
-          <div className="p-8 bg-white rounded-3xl border border-pink-100 shadow-sm h-fit lg:col-span-1">
-            <div className="flex items-center space-x-3 mb-6">
-              <Plus className="w-6 h-6 text-pink-600" />
-              <h2 className="text-xl font-bold">Publier un Actualité / Blog</h2>
-            </div>
-            <form className="space-y-4" onSubmit={handleAddBlog}>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Titre de l'Actualité</label>
-                <input 
-                  type="text" 
-                  value={blogTitle}
-                  onChange={(e) => setBlogTitle(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none" 
-                  placeholder="Ex: Grand défilé FESMODA 2026 à Cotonou"
-                  required 
-                />
+          {/* Create or Edit Blog Form */}
+          {editingBlog ? (
+            <div className="p-8 bg-white rounded-3xl border border-pink-200 shadow-lg h-fit lg:col-span-1">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-3">
+                  <EditIcon className="w-6 h-6 text-pink-600" />
+                  <h2 className="text-xl font-bold">Modifier la Publication</h2>
+                </div>
+                <button 
+                  onClick={() => setEditingBlog(null)} 
+                  className="text-xs text-gray-400 hover:text-gray-600 font-bold"
+                >
+                  Annuler
+                </button>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Auteur</label>
-                <input 
-                  type="text" 
-                  value={blogAuthor}
-                  onChange={(e) => setBlogAuthor(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none" 
-                  placeholder="Ex: Comité d'Organisation"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Image de l'Actualité / Publication</label>
-                <div className="flex items-center gap-4 p-4 bg-gray-50 border border-gray-200 rounded-2xl">
-                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-white border border-gray-200 shrink-0 flex items-center justify-center">
-                    {blogImage ? (
-                      <img src={blogImage} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                    ) : (
-                      <BookOpen className="w-6 h-6 text-gray-300" />
-                    )}
-                  </div>
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <input 
-                        type="file" 
-                        accept="image/*"
-                        onChange={handleBlogImageUpload}
-                        className="hidden"
-                        id="blog-image-upload"
-                      />
-                      <label 
-                        htmlFor="blog-image-upload"
-                        className="px-3 py-2 bg-white hover:bg-gray-100 border border-gray-200 text-pink-600 font-bold text-xs rounded-xl cursor-pointer transition-colors"
-                      >
-                        Téléverser (Max 1MB)
-                      </label>
+              <form className="space-y-4" onSubmit={handleSaveEditedBlog}>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Titre de l'Actualité</label>
+                  <input 
+                    type="text" 
+                    value={editBlogTitle}
+                    onChange={(e) => setEditBlogTitle(e.target.value)}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none" 
+                    required 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Auteur</label>
+                  <input 
+                    type="text" 
+                    value={editBlogAuthor}
+                    onChange={(e) => setEditBlogAuthor(e.target.value)}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Image de l'Actualité</label>
+                  <div className="flex items-center gap-4 p-4 bg-gray-50 border border-gray-200 rounded-2xl">
+                    <div className="w-16 h-16 rounded-xl overflow-hidden bg-white border border-gray-200 shrink-0 flex items-center justify-center">
+                      {editBlogImage ? (
+                        <img src={editBlogImage} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                      ) : (
+                        <BookOpen className="w-6 h-6 text-gray-300" />
+                      )}
                     </div>
-                    <input 
-                      type="url" 
-                      value={blogImage}
-                      onChange={(e) => setBlogImage(e.target.value)}
-                      placeholder="Ou URL d'image"
-                      className="w-full px-3 py-1.5 text-xs bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none"
-                    />
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <input 
+                          type="file" 
+                          accept="image/*"
+                          onChange={handleEditBlogImageUpload}
+                          className="hidden"
+                          id="edit-blog-image-upload"
+                        />
+                        <label 
+                          htmlFor="edit-blog-image-upload"
+                          className="px-3 py-2 bg-white hover:bg-gray-100 border border-gray-200 text-pink-600 font-bold text-xs rounded-xl cursor-pointer transition-colors"
+                        >
+                          Téléverser (Max 1MB)
+                        </label>
+                      </div>
+                      <input 
+                        type="url" 
+                        value={editBlogImage}
+                        onChange={(e) => setEditBlogImage(e.target.value)}
+                        placeholder="Ou URL d'image"
+                        className="w-full px-3 py-1.5 text-xs bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none"
+                      />
+                    </div>
                   </div>
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Contenu de la Publication</label>
+                  <textarea 
+                    value={editBlogContent}
+                    onChange={(e) => setEditBlogContent(e.target.value)}
+                    rows={6}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none resize-none" 
+                    required 
+                  />
+                </div>
+                <button type="submit" className="w-full py-3 bg-pink-600 text-white rounded-xl font-bold hover:bg-pink-700 transition-colors shadow-sm">
+                  Enregistrer les modifications
+                </button>
+              </form>
+            </div>
+          ) : (
+            <div className="p-8 bg-white rounded-3xl border border-pink-100 shadow-sm h-fit lg:col-span-1">
+              <div className="flex items-center space-x-3 mb-6">
+                <Plus className="w-6 h-6 text-pink-600" />
+                <h2 className="text-xl font-bold">Publier un Actualité / Blog</h2>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Contenu de la Publication</label>
-                <textarea 
-                  value={blogContent}
-                  onChange={(e) => setBlogContent(e.target.value)}
-                  rows={6}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none resize-none" 
-                  placeholder="Écrivez votre article d'actualité ici..."
-                  required 
-                />
-              </div>
-              <button type="submit" className="w-full py-3 bg-pink-600 text-white rounded-xl font-bold hover:bg-pink-700 transition-colors shadow-sm">
-                Publier l'actualité
-              </button>
-            </form>
-          </div>
+              <form className="space-y-4" onSubmit={handleAddBlog}>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Titre de l'Actualité</label>
+                  <input 
+                    type="text" 
+                    value={blogTitle}
+                    onChange={(e) => setBlogTitle(e.target.value)}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none" 
+                    placeholder="Ex: Grand défilé FESMODA 2026 à Cotonou"
+                    required 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Auteur</label>
+                  <input 
+                    type="text" 
+                    value={blogAuthor}
+                    onChange={(e) => setBlogAuthor(e.target.value)}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none" 
+                    placeholder="Ex: Comité d'Organisation"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Image de l'Actualité / Publication</label>
+                  <div className="flex items-center gap-4 p-4 bg-gray-50 border border-gray-200 rounded-2xl">
+                    <div className="w-16 h-16 rounded-xl overflow-hidden bg-white border border-gray-200 shrink-0 flex items-center justify-center">
+                      {blogImage ? (
+                        <img src={blogImage} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                      ) : (
+                        <BookOpen className="w-6 h-6 text-gray-300" />
+                      )}
+                    </div>
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <input 
+                          type="file" 
+                          accept="image/*"
+                          onChange={handleBlogImageUpload}
+                          className="hidden"
+                          id="blog-image-upload"
+                        />
+                        <label 
+                          htmlFor="blog-image-upload"
+                          className="px-3 py-2 bg-white hover:bg-gray-100 border border-gray-200 text-pink-600 font-bold text-xs rounded-xl cursor-pointer transition-colors"
+                        >
+                          Téléverser (Max 1MB)
+                        </label>
+                      </div>
+                      <input 
+                        type="url" 
+                        value={blogImage}
+                        onChange={(e) => setBlogImage(e.target.value)}
+                        placeholder="Ou URL d'image"
+                        className="w-full px-3 py-1.5 text-xs bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Contenu de la Publication</label>
+                  <textarea 
+                    value={blogContent}
+                    onChange={(e) => setBlogContent(e.target.value)}
+                    rows={6}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none resize-none" 
+                    placeholder="Écrivez votre article d'actualité ici..."
+                    required 
+                  />
+                </div>
+                <button type="submit" className="w-full py-3 bg-pink-600 text-white rounded-xl font-bold hover:bg-pink-700 transition-colors shadow-sm">
+                  Publier l'actualité
+                </button>
+              </form>
+            </div>
+          )}
 
           {/* Published Articles List */}
           <div className="p-8 bg-white rounded-3xl border border-pink-100 shadow-sm lg:col-span-2">
@@ -2093,19 +3164,548 @@ const AdminDashboard = ({ user, candidates, settings, createNotification, blogs 
                         <p className="text-[10px] text-gray-400">Par: <span className="font-medium text-gray-600">{b.author}</span></p>
                       </div>
                     </div>
-                    <button 
-                      onClick={() => handleDeleteBlog(b.id)}
-                      className="p-2 text-gray-400 hover:text-red-500 transition-colors shrink-0"
-                      title="Supprimer la publication"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex space-x-1 shrink-0">
+                      <button 
+                        onClick={() => handleEditBlogClick(b)}
+                        className="p-2 text-gray-400 hover:text-pink-600 transition-colors"
+                        title="Modifier la publication"
+                      >
+                        <EditIcon className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteBlog(b.id)}
+                        className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                        title="Supprimer la publication"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 ))
               )}
             </div>
           </div>
         </div>
+      )}
+
+      {/* Prizes Tab */}
+      {activeTab === 'prizes' && (
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Create or Edit Prize Form */}
+          <div className="p-8 bg-white rounded-3xl border border-pink-100 shadow-sm h-fit lg:col-span-1">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                {editingPrize ? <EditIcon className="w-6 h-6 text-pink-600" /> : <Plus className="w-6 h-6 text-pink-600" />}
+                <h2 className="text-xl font-bold">{editingPrize ? "Modifier le Prix" : "Ajouter un Prix"}</h2>
+              </div>
+              {editingPrize && (
+                <button 
+                  onClick={() => setEditingPrize(null)} 
+                  className="text-xs text-gray-400 hover:text-gray-600 font-bold"
+                >
+                  Annuler
+                </button>
+              )}
+            </div>
+            <form className="space-y-4" onSubmit={editingPrize ? handleSaveEditedPrize : handleAddPrize}>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Titre du Prix</label>
+                <input 
+                  type="text" 
+                  value={editingPrize ? editPrizeTitle : prizeTitle}
+                  onChange={(e) => editingPrize ? setEditPrizeTitle(e.target.value) : setPrizeTitle(e.target.value)}
+                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none" 
+                  placeholder="Ex: Trophée d'Or FESMODA + 1.000.000 FCFA"
+                  required 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description / Détails</label>
+                <textarea 
+                  value={editingPrize ? editPrizeDescription : prizeDescription}
+                  onChange={(e) => editingPrize ? setEditPrizeDescription(e.target.value) : setPrizeDescription(e.target.value)}
+                  rows={4}
+                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none resize-none" 
+                  placeholder="Détails du lot, de la bourse d'études ou de la formation..."
+                  required 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Ordre d'affichage</label>
+                <input 
+                  type="number" 
+                  value={editingPrize ? editPrizeOrder : prizeOrder}
+                  onChange={(e) => editingPrize ? setEditPrizeOrder(Number(e.target.value)) : setPrizeOrder(Number(e.target.value))}
+                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none" 
+                  placeholder="Ex: 1"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Photo / Image du Prix</label>
+                <div className="flex items-center gap-4 p-4 bg-gray-50 border border-gray-200 rounded-2xl">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-white border border-gray-200 shrink-0 flex items-center justify-center">
+                    {(editingPrize ? editPrizeImage : prizeImage) ? (
+                      <img src={editingPrize ? editPrizeImage : prizeImage} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    ) : (
+                      <Award className="w-6 h-6 text-gray-300" />
+                    )}
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={editingPrize ? handleEditPrizeImageUpload : handlePrizeImageUpload}
+                        className="hidden"
+                        id="prize-image-upload"
+                      />
+                      <label 
+                        htmlFor="prize-image-upload"
+                        className="px-3 py-2 bg-white hover:bg-gray-100 border border-gray-200 text-pink-600 font-bold text-xs rounded-xl cursor-pointer transition-colors"
+                      >
+                        Téléverser (Max 1MB)
+                      </label>
+                    </div>
+                    <input 
+                      type="url" 
+                      value={editingPrize ? editPrizeImage : prizeImage}
+                      onChange={(e) => editingPrize ? setEditPrizeImage(e.target.value) : setPrizeImage(e.target.value)}
+                      placeholder="Ou URL d'image"
+                      className="w-full px-3 py-1.5 text-xs bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+              <button type="submit" className="w-full py-3 bg-pink-600 text-white rounded-xl font-bold hover:bg-pink-700 transition-colors shadow-sm">
+                {editingPrize ? "Enregistrer les modifications" : "Publier le prix"}
+              </button>
+            </form>
+          </div>
+
+          {/* Prizes List */}
+          <div className="p-8 bg-white rounded-3xl border border-pink-100 shadow-sm lg:col-span-2">
+            <div className="flex items-center space-x-3 mb-6">
+              <Award className="w-6 h-6 text-pink-600" />
+              <h2 className="text-xl font-bold">Prix à gagner configurés ({prizes.length})</h2>
+            </div>
+            
+            <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+              {prizes.length === 0 ? (
+                <div className="text-center py-12 text-gray-400 italic">Aucun prix configuré pour cette édition. Utilisez le formulaire pour commencer.</div>
+              ) : (
+                prizes.map((p) => (
+                  <div key={p.id} className="flex items-start justify-between p-4 rounded-2xl bg-gray-50 border border-gray-100 group">
+                    <div className="flex space-x-4">
+                      <img 
+                        src={p.image} 
+                        alt={p.title} 
+                        className="w-20 h-20 rounded-xl object-cover border border-gray-200 bg-white shadow-sm" 
+                        referrerPolicy="no-referrer"
+                      />
+                      <div className="space-y-1">
+                        <span className="text-[10px] text-pink-600 font-bold uppercase tracking-wider">Ordre: {p.order}</span>
+                        <h4 className="font-bold text-gray-900 line-clamp-1">{p.title}</h4>
+                        <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">{p.description}</p>
+                      </div>
+                    </div>
+                    <div className="flex space-x-1 shrink-0">
+                      <button 
+                        onClick={() => handleEditPrizeClick(p)}
+                        className="p-2 text-gray-400 hover:text-pink-600 transition-colors"
+                        title="Modifier le prix"
+                      >
+                        <EditIcon className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => handleDeletePrize(p.id)}
+                        className="p-2 text-gray-400 hover:text-red-500 transition-colors animate-pulse"
+                        title="Supprimer le prix"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Partners Tab */}
+      {activeTab === 'partners' && (
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Create or Edit Partner Form */}
+          <div className="p-8 bg-white rounded-3xl border border-pink-100 shadow-sm h-fit lg:col-span-1">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                {editingPartner ? <EditIcon className="w-6 h-6 text-pink-600" /> : <Plus className="w-6 h-6 text-pink-600" />}
+                <h2 className="text-xl font-bold">{editingPartner ? "Modifier le Partenaire" : "Ajouter un Partenaire"}</h2>
+              </div>
+              {editingPartner && (
+                <button 
+                  onClick={() => setEditingPartner(null)} 
+                  className="text-xs text-gray-400 hover:text-gray-600 font-bold"
+                >
+                  Annuler
+                </button>
+              )}
+            </div>
+            <form className="space-y-4" onSubmit={editingPartner ? handleSaveEditedPartner : handleAddPartner}>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nom du Partenaire / Entreprise</label>
+                <input 
+                  type="text" 
+                  value={editingPartner ? editPartnerName : partnerName}
+                  onChange={(e) => editingPartner ? setEditPartnerName(e.target.value) : setPartnerName(e.target.value)}
+                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none" 
+                  placeholder="Ex: Ministère du Tourisme et de la Culture"
+                  required 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
+                <select 
+                  value={editingPartner ? editPartnerCategory : partnerCategory}
+                  onChange={(e) => editingPartner ? setEditPartnerCategory(e.target.value as any) : setPartnerCategory(e.target.value as any)}
+                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none bg-white"
+                >
+                  <option value="platinum">Platinum / Platine</option>
+                  <option value="gold">Gold / Or</option>
+                  <option value="silver">Silver / Argent</option>
+                  <option value="media">Média Partner</option>
+                  <option value="other">Autre</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Lien du site Web (Optionnel)</label>
+                <input 
+                  type="url" 
+                  value={editingPartner ? editPartnerWebsite : partnerWebsite}
+                  onChange={(e) => editingPartner ? setEditPartnerWebsite(e.target.value) : setPartnerWebsite(e.target.value)}
+                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none" 
+                  placeholder="https://..."
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Logo du Partenaire</label>
+                <div className="flex items-center gap-4 p-4 bg-gray-50 border border-gray-200 rounded-2xl">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-white border border-gray-200 shrink-0 flex items-center justify-center">
+                    {(editingPartner ? editPartnerLogo : partnerLogo) ? (
+                      <img src={editingPartner ? editPartnerLogo : partnerLogo} className="w-full h-full object-contain p-2" referrerPolicy="no-referrer" />
+                    ) : (
+                      <Handshake className="w-6 h-6 text-gray-300" />
+                    )}
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={editingPartner ? handleEditPartnerLogoUpload : handlePartnerLogoUpload}
+                        className="hidden"
+                        id="partner-logo-upload"
+                      />
+                      <label 
+                        htmlFor="partner-logo-upload"
+                        className="px-3 py-2 bg-white hover:bg-gray-100 border border-gray-200 text-pink-600 font-bold text-xs rounded-xl cursor-pointer transition-colors"
+                      >
+                        Téléverser (Max 1MB)
+                      </label>
+                    </div>
+                    <input 
+                      type="url" 
+                      value={editingPartner ? editPartnerLogo : partnerLogo}
+                      onChange={(e) => editingPartner ? setEditPartnerLogo(e.target.value) : setPartnerLogo(e.target.value)}
+                      placeholder="Ou URL de l'image"
+                      className="w-full px-3 py-1.5 text-xs bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-500 outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+              <button type="submit" className="w-full py-3 bg-pink-600 text-white rounded-xl font-bold hover:bg-pink-700 transition-colors shadow-sm">
+                {editingPartner ? "Enregistrer les modifications" : "Publier le partenaire"}
+              </button>
+            </form>
+          </div>
+
+          {/* Partners List */}
+          <div className="p-8 bg-white rounded-3xl border border-pink-100 shadow-sm lg:col-span-2">
+            <div className="flex items-center space-x-3 mb-6">
+              <Handshake className="w-6 h-6 text-pink-600" />
+              <h2 className="text-xl font-bold">Nos Partenaires configurés ({partners.length})</h2>
+            </div>
+            
+            <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+              {partners.length === 0 ? (
+                <div className="text-center py-12 text-gray-400 italic">Aucun partenaire enregistré. Utilisez le formulaire pour commencer.</div>
+              ) : (
+                partners.map((p) => (
+                  <div key={p.id} className="flex items-start justify-between p-4 rounded-2xl bg-gray-50 border border-gray-100 group">
+                    <div className="flex space-x-4">
+                      <div className="w-20 h-20 rounded-xl overflow-hidden bg-white border border-gray-200 shrink-0 flex items-center justify-center p-2">
+                        <img 
+                          src={p.logo || "https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=800&q=80"} 
+                          alt={p.name} 
+                          className="max-h-full max-w-full object-contain" 
+                          referrerPolicy="no-referrer"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[10px] text-pink-600 font-bold uppercase tracking-wider bg-pink-50 px-2.5 py-0.5 rounded-full">{p.category}</span>
+                        <h4 className="font-bold text-gray-900 mt-1">{p.name}</h4>
+                        {p.websiteUrl && <a href={p.websiteUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:underline">{p.websiteUrl}</a>}
+                      </div>
+                    </div>
+                    <div className="flex space-x-1 shrink-0">
+                      <button 
+                        onClick={() => handleEditPartnerClick(p)}
+                        className="p-2 text-gray-400 hover:text-pink-600 transition-colors"
+                        title="Modifier le partenaire"
+                      >
+                        <EditIcon className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => handleDeletePartner(p.id)}
+                        className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                        title="Supprimer le partenaire"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Messages received tab content */}
+      {activeTab === 'messages' && (
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-8 animate-fade-in"
+        >
+          <div className="flex justify-between items-center pb-4 border-b border-pink-100">
+            <div>
+              <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tight">Messages Reçus</h2>
+              <p className="text-gray-500 text-sm mt-1">Gérez les questions et retours envoyés par le formulaire de contact.</p>
+            </div>
+            <span className="bg-pink-100 text-pink-700 font-bold px-4 py-1.5 rounded-full text-xs uppercase tracking-wider">
+              {contacts.length} Message(s) au total
+            </span>
+          </div>
+
+          {contacts.length === 0 ? (
+            <div className="text-center py-20 bg-pink-50/20 rounded-[2.5rem] border border-dashed border-pink-200">
+              <Mail className="w-12 h-12 text-pink-300 mx-auto mb-4" />
+              <p className="text-gray-500 font-bold">Aucun message reçu pour le moment.</p>
+              <p className="text-gray-400 text-sm mt-1">Les messages du formulaire de contact s'afficheront ici en temps réel.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {contacts.map((msg) => (
+                <div 
+                  key={msg.id} 
+                  className={cn(
+                    "p-6 rounded-[2rem] border transition-all relative overflow-hidden",
+                    !msg.read 
+                      ? "bg-white border-pink-200 shadow-md ring-1 ring-pink-100" 
+                      : "bg-gray-50/70 border-gray-150 text-gray-700 opacity-80 hover:opacity-100"
+                  )}
+                >
+                  {/* Unread indicator bar */}
+                  {!msg.read && (
+                    <div className="absolute top-0 left-0 h-full w-1.5 bg-pink-600"></div>
+                  )}
+
+                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                    <div className="space-y-2 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-black text-lg text-gray-900">{msg.name}</h3>
+                        <span className="text-xs text-gray-400 font-mono">({msg.email})</span>
+                        {!msg.read && (
+                          <span className="bg-pink-100 text-pink-700 text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full tracking-wider">
+                            Nouveau
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div>
+                        <span className="text-xs font-bold uppercase tracking-wider text-pink-600 bg-pink-50 px-2.5 py-1 rounded-md">
+                          Sujet: {msg.subject}
+                        </span>
+                      </div>
+
+                      <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap pt-2 border-t border-gray-100/60 mt-2">
+                        {msg.message}
+                      </p>
+
+                      <div className="text-[10px] text-gray-400 font-mono pt-2">
+                        Reçu le : {new Date(msg.createdAt).toLocaleString('fr-FR')}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0 self-end md:self-start">
+                      <button
+                        onClick={() => handleMarkMessageAsRead(msg.id, !msg.read)}
+                        className={cn(
+                          "px-4 py-2 rounded-xl font-bold text-xs transition-colors border",
+                          msg.read 
+                            ? "bg-white hover:bg-gray-50 border-gray-200 text-gray-600" 
+                            : "bg-pink-600 hover:bg-pink-700 text-white border-pink-600"
+                        )}
+                        title={msg.read ? "Marquer comme non lu" : "Marquer comme lu"}
+                      >
+                        {msg.read ? "Marquer non lu" : "Marquer lu"}
+                      </button>
+                      <button
+                        onClick={() => handleDeleteMessage(msg.id)}
+                        className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all border border-transparent hover:border-red-100"
+                        title="Supprimer le message"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </motion.div>
+      )}
+
+      {/* Partnership requests tab content */}
+      {activeTab === 'requests' && (
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-8 animate-fade-in"
+        >
+          <div className="flex justify-between items-center pb-4 border-b border-pink-100">
+            <div>
+              <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tight">Demandes de Partenariat</h2>
+              <p className="text-gray-500 text-sm mt-1">Traitez les propositions de collaboration et de sponsoring.</p>
+            </div>
+            <span className="bg-pink-100 text-pink-700 font-bold px-4 py-1.5 rounded-full text-xs uppercase tracking-wider">
+              {partnerRequests.length} Demande(s) au total
+            </span>
+          </div>
+
+          {partnerRequests.length === 0 ? (
+            <div className="text-center py-20 bg-pink-50/20 rounded-[2.5rem] border border-dashed border-pink-200">
+              <Handshake className="w-12 h-12 text-pink-300 mx-auto mb-4" />
+              <p className="text-gray-500 font-bold">Aucune demande reçue pour le moment.</p>
+              <p className="text-gray-400 text-sm mt-1">Les demandes de partenariat soumises en ligne apparaîtront ici.</p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {partnerRequests.map((req) => (
+                <div 
+                  key={req.id} 
+                  className={cn(
+                    "p-8 rounded-[2.5rem] border transition-all relative overflow-hidden bg-white shadow-sm",
+                    req.status === 'pending' ? "border-amber-200 ring-1 ring-amber-50" :
+                    req.status === 'approved' ? "border-green-200 bg-green-50/10" : "border-gray-200 bg-gray-50/50 opacity-75 hover:opacity-100"
+                  )}
+                >
+                  {/* Status Indicator Tag */}
+                  <div className="absolute top-6 right-6 flex items-center gap-2">
+                    {req.status === 'pending' && (
+                      <span className="bg-amber-100 text-amber-800 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full">
+                        En Attente
+                      </span>
+                    )}
+                    {req.status === 'approved' && (
+                      <span className="bg-green-100 text-green-800 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full">
+                        Approuvée
+                      </span>
+                    )}
+                    {req.status === 'declined' && (
+                      <span className="bg-red-100 text-red-800 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full">
+                        Refusée
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="space-y-4">
+                    {/* Header */}
+                    <div>
+                      <h3 className="text-xl font-black text-gray-950 uppercase tracking-tight">{req.companyName}</h3>
+                      <p className="text-sm text-pink-600 font-bold mt-1">
+                        Catégorie souhaitée : <span className="uppercase">{req.category === 'platinum' ? 'Platine' : req.category === 'gold' ? 'Or' : req.category === 'silver' ? 'Argent' : req.category === 'media' ? 'Média' : 'Autre'}</span>
+                      </p>
+                    </div>
+
+                    {/* Contact Details Grid */}
+                    <div className="grid sm:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 text-sm">
+                      <div>
+                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Contact Principal</p>
+                        <p className="font-bold text-gray-800 mt-0.5">{req.contactName}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Email</p>
+                        <a href={`mailto:${req.email}`} className="font-bold text-pink-600 hover:underline mt-0.5 block">{req.email}</a>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Téléphone</p>
+                        <a href={`tel:${req.phone}`} className="font-bold text-gray-800 hover:underline mt-0.5 block">{req.phone}</a>
+                      </div>
+                    </div>
+
+                    {/* Message Body */}
+                    <div className="space-y-1">
+                      <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Proposition / Message</p>
+                      <p className="text-gray-700 text-sm leading-relaxed bg-pink-50/10 p-5 rounded-2xl border border-pink-50/50 whitespace-pre-wrap">
+                        {req.message}
+                      </p>
+                    </div>
+
+                    {/* Bottom Action Bar */}
+                    <div className="pt-4 border-t border-gray-100 flex flex-wrap items-center justify-between gap-4">
+                      <span className="text-[10px] text-gray-400 font-mono">
+                        Soumise le : {new Date(req.createdAt).toLocaleString('fr-FR')}
+                      </span>
+
+                      <div className="flex items-center gap-2">
+                        {req.status === 'pending' && (
+                          <>
+                            <button
+                              onClick={() => handleMarkRequestStatus(req.id, 'approved', req)}
+                              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-bold text-xs rounded-xl transition-colors shadow-sm"
+                            >
+                              Approuver & Ajouter
+                            </button>
+                            <button
+                              onClick={() => handleMarkRequestStatus(req.id, 'declined', req)}
+                              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold text-xs rounded-xl transition-colors border border-gray-200"
+                            >
+                              Refuser
+                            </button>
+                          </>
+                        )}
+                        {req.status !== 'pending' && (
+                          <span className="text-xs text-gray-400 italic">
+                            Statut traité
+                          </span>
+                        )}
+                        <button
+                          onClick={() => handleDeletePartnerRequest(req.id)}
+                          className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                          title="Supprimer la demande"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </motion.div>
       )}
     </div>
   );

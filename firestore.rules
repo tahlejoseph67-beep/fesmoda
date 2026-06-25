@@ -65,5 +65,29 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+
+    // Prizes
+    match /prizes/{prizeId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Partners
+    match /partners/{partnerId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Contacts / Contact Messages
+    match /contacts/{contactId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Partner Requests
+    match /partnerRequests/{requestId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
   }
 }

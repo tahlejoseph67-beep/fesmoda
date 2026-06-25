@@ -59,3 +59,44 @@ export interface AppNotification {
   read: boolean;
   createdAt: string;
 }
+
+export interface Prize {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  order: number;
+  createdAt: string;
+}
+
+export interface Partner {
+  id: string;
+  name: string;
+  logo: string;
+  category: 'platinum' | 'gold' | 'silver' | 'media' | 'other';
+  websiteUrl?: string;
+  createdAt: string;
+}
+
+export interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  createdAt: string;
+  read: boolean;
+}
+
+export interface PartnerRequest {
+  id: string;
+  companyName: string;
+  contactName: string;
+  email: string;
+  phone: string;
+  category: 'platinum' | 'gold' | 'silver' | 'media' | 'other';
+  message: string;
+  createdAt: string;
+  status: 'pending' | 'approved' | 'declined';
+}
+

@@ -71,6 +71,66 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["title", "content"]
+    },
+    "prize": {
+      "title": "Prize",
+      "description": "A prize/award for the event",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "image": { "type": "string" },
+        "order": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "description", "image", "order"]
+    },
+    "partner": {
+      "title": "Partner",
+      "description": "An event partner or sponsor",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "logo": { "type": "string" },
+        "category": { "type": "string", "enum": ["platinum", "gold", "silver", "media", "other"] },
+        "websiteUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "logo", "category"]
+    },
+    "contactMessage": {
+      "title": "ContactMessage",
+      "description": "A contact submission from the public",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "subject": { "type": "string" },
+        "message": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "read": { "type": "boolean" }
+      },
+      "required": ["name", "email", "subject", "message"]
+    },
+    "partnerRequest": {
+      "title": "PartnerRequest",
+      "description": "A request/proposal to become a partner",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "companyName": { "type": "string" },
+        "contactName": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "category": { "type": "string", "enum": ["platinum", "gold", "silver", "media", "other"] },
+        "message": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["pending", "approved", "declined"] }
+      },
+      "required": ["companyName", "contactName", "email", "phone", "category", "message"]
     }
   },
   "firestore": {
@@ -93,6 +153,22 @@
     "/blogs/{blogId}": {
       "schema": "blog",
       "description": "Collection of blog posts"
+    },
+    "/prizes/{prizeId}": {
+      "schema": "prize",
+      "description": "Collection of event prizes"
+    },
+    "/partners/{partnerId}": {
+      "schema": "partner",
+      "description": "Collection of event partners"
+    },
+    "/contacts/{contactId}": {
+      "schema": "contactMessage",
+      "description": "Collection of contact messages"
+    },
+    "/partnerRequests/{requestId}": {
+      "schema": "partnerRequest",
+      "description": "Collection of partnership requests"
     }
   }
 }
