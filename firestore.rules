@@ -8,11 +8,14 @@ service cloud.firestore {
     
     function isAdmin() {
       return isAuthenticated() && 
-        (request.auth.token.email == "kaelsandeofficiel480@gmail.com" || 
-         request.auth.token.email == "contact@fesmoda.com" ||
-         request.auth.token.email == "adminfesmoda@fesmoda.com" ||
-         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'));
+        (('email' in request.auth.token && (
+          request.auth.token.email.lower() == "kaelsandeofficiel480@gmail.com" || 
+          request.auth.token.email.lower() == "contact@fesmoda.com" ||
+          request.auth.token.email.lower() == "adminfesmoda@fesmoda.com"
+        )) || (
+          exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+        ));
     }
     
     function isOwner(userId) {

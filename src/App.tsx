@@ -716,7 +716,7 @@ const ContactPage = () => {
                 </div>
                 <div>
                   <p className="text-xs text-pink-200 font-bold uppercase tracking-wider">Téléphone / WhatsApp</p>
-                  <a href="tel:+22901000000" className="font-bold hover:underline">+229 01 00 00 00</a>
+                  <a href="tel:+2290147379395" className="font-bold hover:underline">+229 01 47 37 93 95</a>
                 </div>
               </div>
 
@@ -726,7 +726,7 @@ const ContactPage = () => {
                 </div>
                 <div>
                   <p className="text-xs text-pink-200 font-bold uppercase tracking-wider">Adresse</p>
-                  <p className="font-bold">Cotonou, Bénin</p>
+                  <p className="font-bold">Abomey-Calavi, Bénin</p>
                 </div>
               </div>
             </div>
@@ -1643,7 +1643,7 @@ export default function App() {
         setContacts(list);
       },
       (error) => {
-        console.error("Error listening to contacts:", error);
+        handleFirestoreError(error, OperationType.LIST, 'contacts');
       }
     );
 
@@ -1654,7 +1654,7 @@ export default function App() {
         setPartnerRequests(list);
       },
       (error) => {
-        console.error("Error listening to partnerRequests:", error);
+        handleFirestoreError(error, OperationType.LIST, 'partnerRequests');
       }
     );
 
